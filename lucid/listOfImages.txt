@@ -1,0 +1,6 @@
+banana.jpg
+manzana.jpg
+pera.jpg
+limon.jpg
+guayaba.jpg
+melon.jpg

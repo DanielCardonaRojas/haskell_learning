@@ -1,0 +1,3 @@
+data EitherIO e a = EitherIO {
+    runEitherIO :: IO (Either e a)
+}
