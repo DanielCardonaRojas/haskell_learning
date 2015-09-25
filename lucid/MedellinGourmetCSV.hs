@@ -3,21 +3,7 @@
 module MedellinGourmetCSV 
     (
       getCSVInfo,
-      Info,
-      logo,
-      dir, 
-      tel,
-      cat, 
-      val,
-      restr,
-      nTab, 
-      web, 
-      fb,
-      twitter,
-      instagram,
-      tripadvisor,
-      hasCoffee,
-      datos
+      Info (..)
     ) where
 
 import qualified Data.ByteString.Lazy as BL

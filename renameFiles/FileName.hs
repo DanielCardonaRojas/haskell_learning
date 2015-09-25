@@ -9,8 +9,13 @@ nameAndExt filename = let (name,ext) = break (== '.') filename in (name, dropWhi
 getName = fst . nameAndExt
 getExt = snd . nameAndExt
 
-modifyName f = concatTupleUsing "." . applyToFirst f . nameAndExt
-modifyExt f = concatTupleUsing "." . applyToSecond f . nameAndExt
+modifyName f = concatTupleUsing "." . applyToFirst (applySafe f) . nameAndExt
+modifyExt f = concatTupleUsing "." . applyToSecond (applySafe f) . nameAndExt
+
+applySafe f x = let y = f x 
+				in case y of 
+					[] -> x
+					_ -> y
 
 nameWithExt (name,ext) = name ++ "." ++ ext
 

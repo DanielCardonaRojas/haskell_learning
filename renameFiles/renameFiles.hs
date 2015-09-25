@@ -103,6 +103,7 @@ performOption (EnumAppending s) = renameAllFilesUsing $ enumAppending s
 performOption (Delete s) = renameAllFilesUsing' $ (modifyName (deleteWord s)) 
 performOption (TrimEnd s) = renameAllFilesUsing' $ trimFileEnd s 
 performOption (TrimBeg s) = renameAllFilesUsing' $ trimFileBeg s
+performOption (EnumWith s) = renameAllFilesUsing $ enumEnd . (map $ modifyName (const s))
 
 
 main :: IO ()

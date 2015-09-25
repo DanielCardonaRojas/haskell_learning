@@ -1,6 +1,5 @@
 {-#LANGUAGE OverloadedStrings, ExtendedDefaultRules #-}
 
-
 import Lucid
 import Data.Monoid
 import Control.Monad.Trans
@@ -8,26 +7,9 @@ import Control.Monad.Reader
 import Control.Applicative ((<*>), (<$>))
 import Data.Text (pack,append) 
 import qualified Data.Text.Lazy.IO as B
+--Custom
+import MedellinGourmetCSV 
 
-import qualified MedellinGourmetCSV as M
-
-type URL = String
-data Info = Info {
-                  logo::URL,
-                  dir::String, 
-                  tel::String,
-                  cat :: String, 
-                  val :: String,
-                  restr:: String,
-                  nTab :: String, --Numero de mesas
-                  web ::Maybe String,
-                  fb::Maybe String,
-                  twitter::Maybe String,
-                  instagram :: Maybe String,
-                  tripadvisor :: Maybe String,
-                  hasCoffee :: Bool,
-                  datos :: [String]
-                 } deriving (Show,Eq)
 
 defInfo = Info {logo = "images/restaurantes/milogo.png",
                   dir = "Calle 10 A # 43", 
@@ -82,9 +64,6 @@ socialOpts = do
 
 cafeR :: Reader Info Bool
 cafeR = reader hasCoffee
-
-------------------- Utilities -------------
-
 
  ------------------------- LUCID HTML TEMPLATING ---------------------
 iconosMenu :: Html ()
@@ -200,26 +179,10 @@ restaurante = div_ [class_ "row"] $ do
   infoSecundaria
   
 ----------------- CSV ----------------
-infoToinfo :: M.Info -> Info 
-infoToinfo i = Info 
-                  (M.logo i) 
-                  (M.dir i)  
-                  (M.tel i) 
-                  (M.cat i)  
-                  (M.val i) 
-                  (M.restr i) 
-                  (M.nTab i)  
-                  (M.web i)  
-                  (M.fb i) 
-                  (M.twitter i) 
-                  (M.instagram i) 
-                  (M.tripadvisor i) 
-                  (M.hasCoffee i) 
-                  (M.datos i) 
 
 main = do 
-  i <- (M.getCSVInfo "mgourmet.csv")
-  let i' = fmap infoToinfo i 
+  i <- (getCSVInfo "mgourmet.csv")
+  let i' = fmap id i 
   print i'
   case i' of
     Nothing -> putStrLn "Couldnt parse the csv file"

@@ -24,6 +24,7 @@ data Flag =   TrimBeg Int
 			| Delete String
 			| EnumPrepending String 
 			| EnumAppending String
+            | EnumWith String
 			| Clean 
 			| Append String
 			| Prepend String
@@ -40,7 +41,9 @@ options = [
     Option ['e'] ["enumPrep"]   (ReqArg EnumPrepending "String") "String that gets prepended to number",
     Option ['E'] ["enumApp"]   (ReqArg EnumAppending "String") "String that gets appended to number",
     Option ['n'] ["number"]   (NoArg Enumerate) "Enumerate file names at end",
-    Option ['N'] ["numberBeg"]   (NoArg EnumerateBeg) "Enumerate file names at beginning"
+    Option ['N'] ["numberBeg"]   (NoArg EnumerateBeg) "Enumerate file names at beginning",
+    Option ['l'] ["enumWith"]   (ReqArg EnumWith "String") "All files will have this name plus an extra number at the end"
+
   ]
  
 
