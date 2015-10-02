@@ -54,6 +54,15 @@ deleteExtra :: Eq a => [a] -> [a] -> [a]
 deleteExtra ch str = concat $ map (headOrId $ allAreOneOf ch) $ groupBy (==) str
 					 where allAreOneOf = all . (flip elem); headOrId p = (\group -> if p group then [head group] else id group)
 
+-------------- decimate lists -------------
+decimate :: [a] -> [a]
+decimate (x:_:xs) = x : decimate xs
+decimate (x:_) = [x]
+decimate _ = []
+
+everyEven = decimate
+everyOdd = decimate . tail
+
 --------------------- Predicates -----------------------
 
 allOf :: [a -> Bool] -> a -> Bool
