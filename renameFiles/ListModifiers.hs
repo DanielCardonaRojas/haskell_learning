@@ -34,7 +34,7 @@ containsWord w str | length str < length w = False
 				   | isPrefixOf w str = True
 				   | otherwise = containsWord w (tail str)
 
-replaceWord new old = modifyWord (const new) old
+replaceWord old new = modifyWord (const new) old
 
 deleteWord :: Eq a => [a] -> [a] -> [a]
 deleteWord = modifyWord (const []) 
