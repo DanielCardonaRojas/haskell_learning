@@ -24,10 +24,11 @@ data Flag =   TrimBeg Int
 			| Delete String
 			| EnumPrepending String 
 			| EnumAppending String
-            | EnumWith String
+                        | EnumWith String
 			| Clean 
 			| Append String
 			| Prepend String
+			| Replace String String
 			deriving (Show,Eq)
 
 options :: [OptDescr Flag]
@@ -42,13 +43,33 @@ options = [
     Option ['E'] ["enumApp"]   (ReqArg EnumAppending "String") "String that gets appended to number",
     Option ['n'] ["number"]   (NoArg Enumerate) "Enumerate file names at end",
     Option ['N'] ["numberBeg"]   (NoArg EnumerateBeg) "Enumerate file names at beginning",
-    Option ['l'] ["enumWith"]   (ReqArg EnumWith "String") "All files will have this name plus an extra number at the end"
-
+    Option ['l'] ["enumWith"]   (ReqArg EnumWith "String") "All files will have this name plus an extra number at the end",
+    Option ['r'] ["replace"]   (ReqArg makeReplace "oldString|newString") "Replace old substring with new string"	
   ]
  
+
+opciones :: [OptDescr Flag]
+opciones = [
+    Option ['c'] ["clean"] (NoArg Clean) "remueve characteres especiales, pone en minuscular y agregar guion bajo",
+    Option ['a'] ["append"]   (ReqArg Append "String") "Anteceder palabra a todos los nombres",
+    Option ['p'] ["prepend"]   (ReqArg Prepend "String") "Agregar palabra al final del los nombres",
+    Option ['d'] ["delete"]   (ReqArg Delete "String") "Borrar todas apariciones de la palabra",
+    Option ['t'] ["trimEnd"]   (ReqArg (TrimEnd . read) "Number") "Borrar el numero especificado de caracteres al final del nombre",
+    Option ['T'] ["trimBeg"]   (ReqArg (TrimBeg . read) "Number") "Borrar el numero especificado de caracteres al principio del nombre",
+    Option ['e'] ["enumPrep"]   (ReqArg EnumPrepending "String") "Enumerar precediendo una palabra",
+    Option ['E'] ["enumApp"]   (ReqArg EnumAppending "String") "Enumerar posponiendo una palabra",
+    Option ['n'] ["number"]   (NoArg Enumerate) "Enumerar nombre con numero al final del nombre",
+    Option ['N'] ["numberBeg"]   (NoArg EnumerateBeg) "Enumerar nombre con numero al principio del nombre",
+    Option ['l'] ["listWith"]   (ReqArg ListUsing "String") "Enumerar y remplazar nombre por palabra",
+    Option ['r'] ["replace"]   (ReqArg makeReplace "oldString|newString") "Reemplazar palabra vieja por nueva"
+  ]
 
 -- one possibility for handling optional file args:
 -- if no file is provided as argument, read from stdin
 
+tupleSepBy c str = let (f,s) = break (== c) str in (f, tail s)
+makeReplace = uncurry Replace . (tupleSepBy '|')
+
 
 header = "Usage: main [OPTION...]"
+header' = "Formas de uso de este programa..."
