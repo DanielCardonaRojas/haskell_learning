@@ -104,6 +104,7 @@ performOption (Delete s) = renameAllFilesUsing' $ (modifyName (deleteWord s))
 performOption (TrimEnd s) = renameAllFilesUsing' $ trimFileEnd s 
 performOption (TrimBeg s) = renameAllFilesUsing' $ trimFileBeg s
 performOption (EnumWith s) = renameAllFilesUsing $ enumEnd . (map $ modifyName (const s))
+performOption (Replace o n) = renameAllFilesUsing' (replaceWord o n)
 
 
 main :: IO ()
