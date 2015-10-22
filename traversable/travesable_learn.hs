@@ -5,6 +5,7 @@ import Data.Foldable
 import Control.Monad.Trans.Maybe
 import Control.Monad.Trans
 import Control.Monad.Reader
+import Text.Read
 
 data Max = Max {getMax :: Int} | MinusInfinity deriving (Show)
 data MyTree a = Empty | Leaf a | Node a (MyTree a) a deriving (Show)
@@ -74,10 +75,6 @@ correctLength s = do
 			      getLine
 
 
-
-
-
-
 test0 = traverse printGetLine defTree
 test0List = traverse printGetLine [1..3]
 test0Trans = runMaybeT $ traverse (\x -> correctUserName x >>= correctPass) ["daniel", "pedro"]
@@ -97,3 +94,26 @@ filterTree p t = fold (fmap (\x -> if p x then [x] else []) t)
 
 test3 = filterTree ((> 3) . length) defTree
 
+
+{-Lets test foldM a little
+Remember
+foldM :: (Monad m, Foldable t) => (b -> a -> m b) -> b -> t a -> m b 
+
+Especialized to list
+
+foldM :: (Monad m) => (b -> a -> m b) -> b -> [a] -> m b
+-}
+data Color = Red | Green | Blue | Yellow | White | Orange deriving (Show,Eq,Read)
+
+fun :: String -> Color -> IO (String)
+fun s c = do 
+	putStrLn $ "What is your favorite color besides: " ++ s
+	ans <- getLine
+	let x = (readMaybe::String -> Maybe Color) ans
+	case fmap (== c) x of
+		Just True -> putStrLn "Wow man just the color I was thinking about!" >> return ans
+		Just False -> putStrLn  ("I honestly prefer: " ++ (show c))  >> return ans
+		Nothing -> putStrLn "Man thats not a color I've heard of!"	>> return ans
+
+
+test4 = foldM fun "white" [Red,Blue,Green,Yellow]

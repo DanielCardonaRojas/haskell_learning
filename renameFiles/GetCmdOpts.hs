@@ -8,7 +8,7 @@ import System.Console.GetOpt
 import Data.Maybe( fromMaybe )
 import Text.Read
 
-
+-- | Get command line argumentes to build a Flag type.
 renamingOpts = do
   args <- getArgs
   case getOpt RequireOrder options args of
@@ -24,7 +24,7 @@ data Flag =   TrimBeg Int
 			| Delete String
 			| EnumPrepending String 
 			| EnumAppending String
-                        | EnumWith String
+            | EnumWith String
 			| Clean 
 			| Append String
 			| Prepend String
@@ -60,7 +60,7 @@ opciones = [
     Option ['E'] ["enumApp"]   (ReqArg EnumAppending "String") "Enumerar posponiendo una palabra",
     Option ['n'] ["number"]   (NoArg Enumerate) "Enumerar nombre con numero al final del nombre",
     Option ['N'] ["numberBeg"]   (NoArg EnumerateBeg) "Enumerar nombre con numero al principio del nombre",
-    Option ['l'] ["listWith"]   (ReqArg ListUsing "String") "Enumerar y remplazar nombre por palabra",
+    -- Option ['l'] ["listWith"]   (ReqArg ListUsing "String") "Enumerar y remplazar nombre por palabra",
     Option ['r'] ["replace"]   (ReqArg makeReplace "oldString|newString") "Reemplazar palabra vieja por nueva"
   ]
 

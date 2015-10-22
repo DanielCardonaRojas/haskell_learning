@@ -12,16 +12,16 @@ import Data.Monoid
 import Text.Read 
 import Control.Exception
 
+import Data.Foldable (find)
+
 -- Custom Modules
 import FolderIO
 import FileName 
 import ListModifiers
 import GetCmdOpts 
 
-
 trimFileEnd :: Int -> String -> String
-trimFileEnd n = modifyName trimFromEnd
-	where trimFromEnd = reverse . drop n . reverse 
+trimFileEnd n s = modifyName (reverse . drop n . reverse) s
 
 trimFileBeg n = modifyName (drop n)
 
@@ -48,7 +48,7 @@ enumAndUnderscore' = enumBeg . (map underscoreAndLower)
 enumPrepending str = enumEnd . map (modifyName (const str))
 enumAppending str = enumBeg . map (modifyName (const str)) 
 
-------------------------- Renaming Functions ----------------------
+------------------------- Renaming Higher Order Functions ----------------------
 renameFiles ::(String -> Bool) -> FilePath -> ([String] -> [String]) -> IO ()
 renameFiles p src fun = do 
 		oldFileList <- getFileListFiltering p src
@@ -57,60 +57,80 @@ renameFiles p src fun = do
 		let rename' = uncurry renameFile 
 		mapM_ rename' oldNewList
 
-renameFiles' ::(String -> Bool) -> FilePath -> (String -> String) -> IO ()
-renameFiles' p src fun = renameFiles p src (map fun)
-
 renameAllFilesAt :: FilePath -> ([String] -> [String]) -> IO ()
 renameAllFilesAt src fun =  renameFiles (const True) src fun
-
-renameAllFilesAt' :: FilePath -> (String -> String) -> IO ()
-renameAllFilesAt' src fun = renameAllFilesAt src $ map fun
 
 renameAllFilesUsing:: ([String] -> [String]) -> IO ()
 renameAllFilesUsing fun = getCurrentDirectory >>= flip renameAllFilesAt fun
 
-renameAllFilesUsing':: (String -> String) -> IO ()
-renameAllFilesUsing' fun = renameAllFilesUsing $ map fun
-
 renameCopying:: (String -> Bool) -> String -> FilePath -> ([String] -> [String]) -> IO ()
 renameCopying p folderName src fun = copyFilesIn p src folderName >>= flip renameAllFilesAt fun 
-
-renameCopying' :: (String -> Bool) -> String -> FilePath -> (String -> String) -> IO ()
-renameCopying' p folderName src fun = renameCopying p folderName src (map fun)
 
 renameAllCopyingAt :: String -> FilePath -> ([String] -> [String]) -> IO ()
 renameAllCopyingAt folderName src fun = copyAllFilesIn src folderName >>= flip renameAllFilesAt fun
 
-renameAllCopyingAt' ::  String -> FilePath -> (String -> String) -> IO ()
-renameAllCopyingAt' folderName src fun = renameAllCopyingAt folderName src $ map fun
-
 renameAllCopiedFilesUsing :: ([String] -> [String]) -> IO ()
 renameAllCopiedFilesUsing fun = getCurrentDirectory >>= flip (renameAllCopyingAt "outFolder") fun
 
-renameAllCopiedFilesUsing' :: (String -> String) -> IO ()
-renameAllCopiedFilesUsing' fun = renameAllCopiedFilesUsing $ map fun
+renameFilesWithExtension :: (String -> Bool) -> ([String] ->[String]) -> IO ()
+renameFilesWithExtension p modFun = getCurrentDirectory >>= \src -> renameFiles (extIs p) src modFun
 
-------------------------------- MAIN ----------------------------
+----------------------------- MAIN PROCESSING FUNCTIONS  ----------------------------
 
-performOption :: Flag -> IO ()
-performOption Clean = renameAllFilesUsing' cleanUp
-performOption Enumerate = renameAllFilesUsing enumEnd
-performOption EnumerateBeg = renameAllFilesUsing enumBeg
-performOption (Append s) = renameAllFilesUsing' $ appendToFileName s
-performOption (Prepend s) = renameAllFilesUsing' $ prependToFileName s
-performOption (EnumPrepending s) = renameAllFilesUsing $ enumPrepending s 
-performOption (EnumAppending s) = renameAllFilesUsing $ enumAppending s 
-performOption (Delete s) = renameAllFilesUsing' $ (modifyName (deleteWord s)) 
-performOption (TrimEnd s) = renameAllFilesUsing' $ trimFileEnd s 
-performOption (TrimBeg s) = renameAllFilesUsing' $ trimFileBeg s
-performOption (EnumWith s) = renameAllFilesUsing $ enumEnd . (map $ modifyName (const s))
-performOption (Replace o n) = renameAllFilesUsing' (replaceWord o n)
+performOnSelection :: FileSelector -> Flag -> IO ()
+performOnSelection s o =
+	let f = modifierFromOption o 
+	in case s of 
+		WithExt x -> renameFilesWithExtension (== x) f
+		WithSubstring ss -> getCurrentDirectory >>= \src -> renameFiles (nameIs $ containsWord ss) src f
+		OnAll -> renameAllFilesUsing f
 
+ ----------- SELECTIN A MODIFYING FUNCTION TO APPLY ELEMENT WISE OR LIST WIE ----------
+modifierFromOption = onListOrElementwise . selectOption
+
+onListOrElementwise (OnList f) = f 
+onListOrElementwise (Elementwise f) = map f
+
+selectOption :: Flag -> SelectionModifier
+selectOption Clean = Elementwise cleanUp
+selectOption Enumerate = OnList enumEnd
+selectOption EnumerateBeg = OnList enumBeg
+selectOption (Append s) = Elementwise $ appendToFileName s
+selectOption (Prepend s) = Elementwise $ prependToFileName s
+selectOption (EnumPrepending s) = OnList $ enumPrepending s 
+selectOption (EnumAppending s) = OnList $ enumAppending s 
+selectOption (Delete s) = Elementwise $ (modifyName (deleteWord s)) 
+selectOption (TrimEnd s) = Elementwise $ trimFileEnd s 
+selectOption (TrimBeg s) = Elementwise $ trimFileBeg s
+selectOption (ListUsing s) = OnList (enumEnd . (map $ modifyName (const s)))
+selectOption (Replace o n) = Elementwise (replaceWord o n)
+selectOption (FileSelection s) = OnList id 
+
+data SelectionModifier = Elementwise (String->String) | OnList ([String]->[String])
+data FileSelector = WithExt String | WithSubstring String | OnAll
+
+fileSelectorFromArg :: Flag -> FileSelector
+fileSelectorFromArg (FileSelection arg) = 
+						  let 
+						    isExtensionSel = not (null $ getExt arg) 
+                          in 
+                             if isExtensionSel 
+                          	 then WithExt $ getExt arg
+                          	 else WithSubstring arg 
+
+isFileSelecion :: Flag -> Bool 
+isFileSelecion (FileSelection s) = True
+isFileSelecion _ = False
+
+getFileSelection :: [Flag] -> Maybe Flag
+getFileSelection = find isFileSelecion
 
 main :: IO ()
 main = do
 	flags <- renamingOpts
-	mapM_ performOption flags
+	let fs =  maybe OnAll fileSelectorFromArg (getFileSelection flags)
+	mapM_ (performOnSelection fs) flags 
+	-- mapM_ performOption flags
 	return ()
 
 
