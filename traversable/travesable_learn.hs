@@ -117,3 +117,7 @@ fun s c = do
 
 
 test4 = foldM fun "white" [Red,Blue,Green,Yellow]
+
+-- Could a generalized filtering operation be written as: 
+
+gfilt p xs = foldMap (\x-> if p x then [x] else []) xs
