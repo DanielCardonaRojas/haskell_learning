@@ -2,6 +2,7 @@ module ListModifiers where
 
 import Data.List
 
+
 -------------------- Tuple Functions ----------------
 swap (x,y) = (y,x)
 applyToFirst f (x,y) = (f x,y)
@@ -62,6 +63,21 @@ decimate _ = []
 
 everyEven = decimate
 everyOdd = decimate . tail
+
+--------------------- Comparerisons -------------------
+--sucesive equal elems in two lists
+equalElems l1 l2 = (length . filter (== True) . takeWhile (== True)) $ zipWith (==) l1 l2
+
+sharedElemsPerc l1 l2 = 
+	let 
+	  maxLen = fromIntegral $ max (length l1) (length l2)
+	  eqs = fromIntegral $ equalElems l1 l2
+	in 100 * (eqs / maxLen)
+
+areSimilarBy perc l1 l2 = (>= perc) $ sharedElemsPerc l1 l2
+
+groupSimilarBy p = groupBy (areSimilarBy p) . sort 
+
 
 --------------------- Predicates -----------------------
 

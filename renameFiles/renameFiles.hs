@@ -48,6 +48,9 @@ enumAndUnderscore' = enumBeg . (map underscoreAndLower)
 enumPrepending str = enumEnd . map (modifyName (const str))
 enumAppending str = enumBeg . map (modifyName (const str)) 
 
+enumSimilarBy p = concat . enumEnd1 . groupSimilarBy p
+                  where
+                     enumEnd1 = \x -> if length x == 1 then x else map enumEnd x
 ------------------------- Renaming Higher Order Functions ----------------------
 renameFiles ::(String -> Bool) -> FilePath -> ([String] -> [String]) -> IO ()
 renameFiles p src fun = do 
@@ -74,7 +77,6 @@ renameAllCopiedFilesUsing fun = getCurrentDirectory >>= flip (renameAllCopyingAt
 
 renameFilesWithExtension :: (String -> Bool) -> ([String] ->[String]) -> IO ()
 renameFilesWithExtension p modFun = getCurrentDirectory >>= \src -> renameFiles (extIs p) src modFun
-
 ----------------------------- MAIN PROCESSING FUNCTIONS  ----------------------------
 
 performOnSelection :: FileSelector -> Flag -> IO ()
@@ -104,7 +106,9 @@ selectOption (TrimEnd s) = Elementwise $ trimFileEnd s
 selectOption (TrimBeg s) = Elementwise $ trimFileBeg s
 selectOption (ListUsing s) = OnList (enumEnd . (map $ modifyName (const s)))
 selectOption (Replace o n) = Elementwise (replaceWord o n)
+selectOption (GroupEnum) = OnList (enumSimilarBy 20)
 selectOption (FileSelection s) = OnList id 
+
 
 data SelectionModifier = Elementwise (String->String) | OnList ([String]->[String])
 data FileSelector = WithExt String | WithSubstring String | OnAll

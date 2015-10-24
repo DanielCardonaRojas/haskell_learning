@@ -94,6 +94,14 @@ filterTree p t = fold (fmap (\x -> if p x then [x] else []) t)
 
 test3 = filterTree ((> 3) . length) defTree
 
+-- Could a generalized filtering operation be written as:
+gfilt :: Foldable t => (a -> Bool) -> t a -> [a] 
+gfilt p xs = foldMap (\x-> if p x then [x] else []) xs
+
+gfilt' p = foldMap $ injectIf p
+
+injectIf :: MonadPlus m => (a -> Bool) -> a -> m a
+injectIf p x = if p x then return x else mzero
 
 {-Lets test foldM a little
 Remember
@@ -118,6 +126,4 @@ fun s c = do
 
 test4 = foldM fun "white" [Red,Blue,Green,Yellow]
 
--- Could a generalized filtering operation be written as: 
 
-gfilt p xs = foldMap (\x-> if p x then [x] else []) xs

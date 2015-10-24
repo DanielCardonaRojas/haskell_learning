@@ -32,6 +32,7 @@ data Flag =   TrimBeg Int
             | Prepend String
             | Replace String String
             | FileSelection String
+            | GroupEnum
             deriving (Show,Eq)
 
 options :: [OptDescr Flag]
@@ -48,8 +49,8 @@ options = [
     Option ['N'] ["numberBeg"]   (NoArg EnumerateBeg) "Enumerate file names at beginning",
     Option ['l'] ["listWith"]   (ReqArg ListUsing "String") "Enumerate files prepending a constant string",
     Option ['r'] ["replace"]   (ReqArg makeReplace "oldString|newString") "Replace old substring with new string",
-    Option ['s'] ["selection"]   (ReqArg FileSelection "String") "Choose a file extension or file name substring"
-
+    Option ['s'] ["selection"]   (ReqArg FileSelection "String") "Choose a file extension or file name substring",
+    Option ['g'] ["groupEnum"] (NoArg GroupEnum) "Enumerates files by groups of similar names"
   ]
  
 opciones :: [OptDescr Flag]
@@ -66,7 +67,8 @@ opciones = [
     Option ['N'] ["numberBeg"]   (NoArg EnumerateBeg) "Enumerar nombre con numero al principio del nombre",
     Option ['l'] ["listWith"]   (ReqArg ListUsing "String") "Enumerar y remplazar nombre por palabra",
     Option ['r'] ["replace"]   (ReqArg makeReplace "oldString|newString") "Reemplazar palabra vieja por nueva",
-    Option ['s'] ["seleccion"]   (ReqArg FileSelection "String") "Elige una extension o  sub nombre"
+    Option ['s'] ["seleccion"]   (ReqArg FileSelection "String") "Elige una extension o  sub nombre",
+    Option ['g'] ["groupEnum"] (NoArg GroupEnum) "Enumerar por grupos, los archivos de nombres similares se enumeran separadamente"
   ]
 
 -- one possibility for handling optional file args:
