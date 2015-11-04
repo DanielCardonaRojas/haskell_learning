@@ -78,7 +78,11 @@ areSimilarBy perc l1 l2 = (>= perc) $ sharedElemsPerc l1 l2
 
 groupSimilarBy p = groupBy (areSimilarBy p) . sort 
 
+equalLengthSubLists ls =  map (take $ (minimum . map length) ls) ls 
 
+zipEq l h =  takeWhile (/= ' ') $ (zipWith (\x y -> if x == y then x else ' ')) l h
+
+withEqLen l = init $ scanl zipEq (head l) l
 --------------------- Predicates -----------------------
 
 allOf :: [a -> Bool] -> a -> Bool

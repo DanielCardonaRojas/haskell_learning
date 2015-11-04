@@ -48,7 +48,7 @@ enumAndUnderscore' = enumBeg . (map underscoreAndLower)
 enumPrepending str = enumEnd . map (modifyName (const str))
 enumAppending str = enumBeg . map (modifyName (const str)) 
 
-enumSimilarBy p = concat . enumEnd1 . groupSimilarBy p
+enumSimilarBy p = concat . enumEnd1 . map equalLengthSublists . groupSimilarBy p
                   where
                      enumEnd1 = \x -> if length x == 1 then x else map enumEnd x
 ------------------------- Renaming Higher Order Functions ----------------------
@@ -134,8 +134,8 @@ main = do
 	flags <- renamingOpts
 	let fs =  maybe OnAll fileSelectorFromArg (getFileSelection flags)
 	mapM_ (performOnSelection fs) flags 
-	-- mapM_ performOption flags
 	return ()
+
 
 
 
