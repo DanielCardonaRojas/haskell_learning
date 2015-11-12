@@ -1,8 +1,19 @@
+module TreeZipper 
+   (
+      Tree (..),
+      navigateThroughPath,
+      navigateDown,
+      navigateToLeaf,
+      navigateToParent
+
+   )where 
+   
 import Data.Tree
 import Data.Tree.Zipper
 import Control.Applicative 
 import Control.Monad 
 import Data.List
+
 
 productMenu  = 
 	Node "Productos" [

@@ -23,7 +23,9 @@ data Person = Person
     , salary :: !Int
     }
 
+parseOneRecord = parseRecord . record . fmap toField
 
+parseMany = V.map parseOneRecord
 -- Manual
 instance FromNamedRecord Person where
     parseNamedRecord r = Person <$> r .: "name" <*> r .: "salary"

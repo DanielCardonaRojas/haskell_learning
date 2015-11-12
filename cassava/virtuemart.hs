@@ -7,11 +7,14 @@ import qualified Data.Vector as V
 import qualified Data.ByteString.Lazy as BL
 import Control.Monad
 import Data.Monoid
-import Data.Tree
 import Data.List 
 
 import Data.ByteString.Lazy.Char8 (pack)
 import qualified Data.ByteString as BS
+
+--Custom 
+
+import TreeZipper
 
 {-
 "product_sku","product_name","category_path","product_desc",
@@ -40,7 +43,7 @@ data VMProduct = VMProduct {
 	thumbnails :: [String]
 }
 
-data CategoryPaths = CPaths [[String]] 
+data CategoryPaths = CPaths [[String]] deriving (Show)
 -- We need a function that will rip apart all details from fields in record
 -- like take apart '|' '/' to make a tree etc... 
 parseProduct :: CSVProduct -> VMProduct
@@ -51,8 +54,14 @@ parseProduct prod@(CSVProduct s n p d u ut t) =
 	  	imgs = splitEvery '|' u 
 	  	thumbs = splitEvery '|' ut
 
-splitEvery c = undefined
-parseCategoryTree = undefined
+splitEvery sep [] = []
+splitEvery sep ls =  f : splitEvery sep rest
+           where 
+             (f,s) = break (== sep) ls
+             safeTail ls = if null ls then [] else tail ls  
+             rest = safeTail s
+
+parseCategoryTree = CPaths . map (splitEvery '/') . splitEvery '|'
 
 
 -- How the whole type gets translated to into a record
