@@ -1,11 +1,15 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 import TryParse
 import Data.Csv
 import Control.Monad
 import System.Environment
 import Data.Either (rights)
+-- import qualified Data.ByteString.Lazy as BL
+
 
 --Try switching the data type for ident  field
-data Person = Person {name :: !String, ident :: !DefIdent} deriving (Show, Eq)
+data Person = Person {name :: !String, ident :: !String} deriving (Show, Eq)
 
 -- Data type for custom field Reading
 newtype DefIdent = DefIdent Int deriving (Eq, Show) 
@@ -14,6 +18,9 @@ instance FromRecord Person where
 	parseRecord r | length r == 2 = Person <$> (r .! 0) <*> (r .! 1)
 	              | otherwise = mzero
 
+instance FromNamedRecord Person where
+    parseNamedRecord r = Person <$> r .: "name" <*> r .: "salary"             
+
 instance FromField DefIdent where
 	parseField s = case runParser (parseField s) of
 						Left err -> pure $ DefIdent (0)
@@ -21,6 +28,8 @@ instance FromField DefIdent where
 
 onlySuccesfulParses :: FromRecord b => String -> IO [b]
 onlySuccesfulParses = fmap rights . readRecords 
+
+
 
 main = do 
     [fileName] <- getArgs

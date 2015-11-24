@@ -1,4 +1,4 @@
-module TryParse (readRecords) where 
+module TryParse (readRecords,readNamedRecords) where 
 
 
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -8,24 +8,35 @@ import Data.Csv
 import qualified Data.ByteString as B 
 import qualified Data.ByteString.Char8 as C
 
+{-
+record :: [ByteString] -> Record
+namedRecrod :: [(ByteString,ByteString)] -> NamedRecord
+-}
 
 --Parses all records 
-parseMap :: FromRecord a => C.ByteString -> [Either String a]
-parseMap = fmap (runParser . parseRecord . record . getFields') . C.lines 
+parseAllRecords  :: FromRecord a => C.ByteString -> [Either String a]
+parseAllRecords  = fmap (runParser . parseRecord . record . getFields) . C.lines 
 
---TODO: Create an equivalent function for named records
--- parseMap' :: FromRecord a => C.ByteString -> [Either String a]
--- parseMap' ls = fmap (runParser . parseNamedRecord . namedRecord . getFields') $ zip (repeat header) rs 
--- 			where 
--- 				sl = C.lines ls
--- 				header = C.head sl
--- 				rs = C.tail ls 
+parseAllNamedRecords :: FromNamedRecord a => C.ByteString -> [Either String a]
+parseAllNamedRecords = fmap (runParser . parseNamedRecord) . (map namedRecord . getNamedRecords)
 
-getFields' = C.splitWith (== ',')
+getRecords = fmap (record . getFields) . C.lines
+
+getNamedRecords bs = map (zip (nameHeader bs)) $ listOfRecords bs 
+          where             
+             listOfRecords = tail . map getFields . C.lines  
+             nameHeader = getFields . head . C.lines
+
+getFields = C.splitWith (== ',')
 
 
 readRecords :: FromRecord a => String -> IO [Either String a]
 readRecords fname = do
     csvData <- B.readFile fname
-    return $ parseMap csvData
+    return $ parseAllRecords  csvData
+
+readNamedRecords :: FromNamedRecord a => String -> IO [Either String a]
+readNamedRecords fname = do 
+	csvData <- B.readFile fname
+	return $ parseAllNamedRecords csvData
     
