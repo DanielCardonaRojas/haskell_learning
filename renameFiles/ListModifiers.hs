@@ -12,9 +12,17 @@ concatTuple (x,y) = x ++ y
 concatTupleUsing sep (x,y) = x ++ sep ++ y
 
 tuplify2 [x,y] = (x,y)
+tuplify2 _ = error "tuplify2 must receive an input list of length 2"
+
 tuplify2With f g [x,y] = (f x, g y)
 tuplify3 [x,y,z] = (x,y,z)
 tuplify3With f g h [x,y,z] = (f x, g y, h z)
+
+uncurry3 :: (a -> b -> c -> d) -> (a,b,c) -> d
+uncurry3 f = \(x,y,z) -> f x y z
+
+curry3 :: ((a,b,c) -> d) -> (a -> b -> c -> d)
+curry3 f = \x y z -> f (x,y,z)
 
 ------------List Functions -----------
 
@@ -24,7 +32,22 @@ toLast f ls = init ls ++ [f $ last ls]
 
 mapInit f ls = (map f . init) ls ++ [last ls]
 
+-- | 'splitEvery' n creates a list with sublists of length n.
+splitEvery _ [] = []
+splitEvery n list = first : (splitEvery n rest) 
+    where (first,rest) = splitAt n list
+
+-- | 'innerZip' takes a list and returns a a list of adjacent elements
+-- If the input list has odd length then the last element is trimmed.
+innerZip :: [a] -> [(a,a)]
+innerZip = map tuplify2 . filter ((== 2) . length) . splitEvery 2  
+
+innerZip3 :: [a] -> [(a,a,a)]
+innerZip3 = map tuplify3 . filter ((== 3) . length) . splitEvery 3  
+
+
 -------------- Deleting and Modifying Lists Elems --------------
+-- | 'modifyWord' f w modifies every ocurrence of w with f
 modifyWord :: Eq a => ([a] -> [a]) -> [a] -> [a] -> [a]
 modifyWord _ _ [] = []
 modifyWord f w str | length str < length w = str
@@ -35,7 +58,11 @@ containsWord w str | length str < length w = False
 				   | isPrefixOf w str = True
 				   | otherwise = containsWord w (tail str)
 
+-- | 'replaceWord' w nw replaces every occurence of w with nw
+--
+-- > replaceWord w nw = modifyWord (const nw) w
 replaceWord old new = modifyWord (const new) old
+
 
 deleteWord :: Eq a => [a] -> [a] -> [a]
 deleteWord = modifyWord (const []) 
@@ -56,6 +83,7 @@ deleteExtra ch str = concat $ map (headOrId $ allAreOneOf ch) $ groupBy (==) str
 					 where allAreOneOf = all . (flip elem); headOrId p = (\group -> if p group then [head group] else id group)
 
 -------------- decimate lists -------------
+-- | decimate collects all even indecis of a list
 decimate :: [a] -> [a]
 decimate (x:_:xs) = x : decimate xs
 decimate (x:_) = [x]
