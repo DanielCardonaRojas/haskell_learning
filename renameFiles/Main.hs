@@ -1,6 +1,8 @@
+module Main where 
+
 import System.Environment
 import Control.Monad 
-import Data.List
+import Data.List hiding (find)
 import Data.Char
 import Control.Concurrent.Async
 import System.FilePath
@@ -19,6 +21,12 @@ import FolderIO
 import FileName 
 import ListModifiers
 import GetCmdOpts 
+
+{-
+Update documentation running: 
+
+haddock Main.hs -o docs -h -w
+-}
 
 trimFileEnd :: Int -> String -> String
 trimFileEnd n s = modifyName (reverse . drop n . reverse) s
@@ -48,10 +56,11 @@ enumAndUnderscore' = enumBeg . (map underscoreAndLower)
 enumPrepending str = enumEnd . map (modifyName (const str))
 enumAppending str = enumBeg . map (modifyName (const str)) 
 
-enumSimilarBy p = concat . enumEnd1 . map equalLengthSublists . groupSimilarBy p
+enumSimilarBy p = concat . enumEnd1 . map equalLengthSubLists . groupSimilarBy p
                   where
                      enumEnd1 = \x -> if length x == 1 then x else map enumEnd x
 ------------------------- Renaming Higher Order Functions ----------------------
+-- | 'renameFiles' p path f renames all files satisfying p at path with f.
 renameFiles ::(String -> Bool) -> FilePath -> ([String] -> [String]) -> IO ()
 renameFiles p src fun = do 
 		oldFileList <- getFileListFiltering p src
@@ -71,6 +80,7 @@ renameCopying p folderName src fun = copyFilesIn p src folderName >>= flip renam
 
 renameAllCopyingAt :: String -> FilePath -> ([String] -> [String]) -> IO ()
 renameAllCopyingAt folderName src fun = copyAllFilesIn src folderName >>= flip renameAllFilesAt fun
+
 
 renameAllCopiedFilesUsing :: ([String] -> [String]) -> IO ()
 renameAllCopiedFilesUsing fun = getCurrentDirectory >>= flip (renameAllCopyingAt "outFolder") fun
@@ -109,8 +119,11 @@ selectOption (Replace o n) = Elementwise (replaceWord o n)
 selectOption (GroupEnum) = OnList (enumSimilarBy 20)
 selectOption (FileSelection s) = OnList id 
 
-
+-- | SelectionModifier wraps functions that operate on each file name in isolation or 
+-- functions that depend on the context of other file names
 data SelectionModifier = Elementwise (String->String) | OnList ([String]->[String])
+
+-- | A type to specify a kind of selection
 data FileSelector = WithExt String | WithSubstring String | OnAll
 
 fileSelectorFromArg :: Flag -> FileSelector

@@ -10,7 +10,7 @@ import Data.Maybe( fromMaybe )
 import Text.Read
 import Data.List
 
-
+-- | renamingOpts delivers the command line specified flags/options 
 renamingOpts = do
   args <- getArgs
   case getOpt RequireOrder opciones args of
@@ -18,19 +18,19 @@ renamingOpts = do
     (_,     nonOpts, [])     -> error $ "unrecognized arguments: " ++ unwords nonOpts
     (_,     _,       msgs)   -> error $ concat msgs ++ usageInfo header' opciones
 
---Add an options to replace String by another String
-data Flag =   TrimBeg Int  
-            | TrimEnd Int 
-            | ListUsing String
-            | Enumerate
+-- | A command line flag is on of the following: 
+data Flag =   TrimBeg Int  -- ^ Trim a number of char off starting from left to right
+            | TrimEnd Int -- ^ Trim n char from the end 
+            | ListUsing String -- ^ Enumerate files prepending a constant string
+            | Enumerate -- ^ Enumerate files at the end
             | EnumerateBeg
-            | Delete String
+            | Delete String -- ^ Delete occurrences of a substring
             | EnumPrepending String 
             | EnumAppending String
-            | Clean 
-            | Append String
-            | Prepend String
-            | Replace String String
+            | Clean -- ^ Clean up file name replace white space for _ remove sybolic chars, remove trailing spaces.
+            | Append String -- ^ Append a string to each file name
+            | Prepend String -- ^ Prepend a string to each file name
+            | Replace String String -- ^ Replace all instances of 
             | FileSelection String
             | GroupEnum
             deriving (Show,Eq)

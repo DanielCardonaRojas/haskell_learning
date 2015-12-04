@@ -4,14 +4,17 @@ import Data.Char
 import ListModifiers
 
 ----- File Name Functions  System.FilePath ----------
-
+-- | returns a (name, ext) of file name
 nameAndExt filename = let (name,ext) = break (== '.') filename in (name, dropWhile (== '.') ext)
 getName = fst . nameAndExt
 getExt = snd . nameAndExt
 
+-- | modifyName f applies f to the filename excluding the extension
 modifyName f = concatTupleUsing "." . applyToFirst (applySafe f) . nameAndExt
+-- | modifyExt f applies f to the extension of a file name.
 modifyExt f = concatTupleUsing "." . applyToSecond (applySafe f) . nameAndExt
 
+-- | 'applySafe' f ls applies f to ls only if it doesnt emply an empty list as a result.
 applySafe f x = let y = f x 
 				in case y of 
 					[] -> x
