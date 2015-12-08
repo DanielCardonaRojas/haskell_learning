@@ -2,19 +2,13 @@ module Main where
 
 import System.Environment
 import Control.Monad 
-import Data.List hiding (find)
+import Data.List 
 import Data.Char
-import Control.Concurrent.Async
 import System.FilePath
 import System.Directory
 import Control.Applicative
-import Control.Monad.Trans (liftIO)
-import Control.Monad.Writer 
 import Data.Monoid
-import Text.Read 
-import Control.Exception
-
-import Data.Foldable (find)
+import Data.Maybe (fromMaybe)
 
 -- Custom Modules
 import FolderIO
@@ -56,9 +50,11 @@ enumAndUnderscore' = enumBeg . (map underscoreAndLower)
 enumPrepending str = enumEnd . map (modifyName (const str))
 enumAppending str = enumBeg . map (modifyName (const str)) 
 
+-- | This function will enumerate simlarly named files by a give percent. Still needs some polishing.
 enumSimilarBy p = concat . enumEnd1 . map equalLengthSubLists . groupSimilarBy p
                   where
                      enumEnd1 = \x -> if length x == 1 then x else map enumEnd x
+
 ------------------------- Renaming Higher Order Functions ----------------------
 -- | 'renameFiles' p path f renames all files satisfying p at path with f.
 renameFiles ::(String -> Bool) -> FilePath -> ([String] -> [String]) -> IO ()
@@ -98,55 +94,43 @@ performOnSelection s o =
 		OnAll -> renameAllFilesUsing f
 
  ----------- SELECTIN A MODIFYING FUNCTION TO APPLY ELEMENT WISE OR LIST WIE ----------
+
+-- | SelectionModifier wraps functions that operate on each file name in isolation or 
+-- functions that depend on the context of other file names, such as order, amount of files etc.
+
+data SelectionModifier = Elementwise (String->String) | OnList ([String]->[String])
+
 modifierFromOption = onListOrElementwise . selectOption
 
 onListOrElementwise (OnList f) = f 
 onListOrElementwise (Elementwise f) = map f
 
+
 selectOption :: Flag -> SelectionModifier
-selectOption Clean = Elementwise cleanUp
-selectOption Enumerate = OnList enumEnd
-selectOption EnumerateBeg = OnList enumBeg
-selectOption (Append s) = Elementwise $ appendToFileName s
-selectOption (Prepend s) = Elementwise $ prependToFileName s
-selectOption (EnumPrepending s) = OnList $ enumPrepending s 
-selectOption (EnumAppending s) = OnList $ enumAppending s 
-selectOption (Delete s) = Elementwise $ (modifyName (deleteWord s)) 
-selectOption (TrimEnd s) = Elementwise $ trimFileEnd s 
-selectOption (TrimBeg s) = Elementwise $ trimFileBeg s
-selectOption (ListUsing s) = OnList (enumEnd . (map $ modifyName (const s)))
-selectOption (Replace o n) = Elementwise (replaceWord o n)
-selectOption (GroupEnum) = OnList (enumSimilarBy 20)
-selectOption (FileSelection s) = OnList id 
+selectOption flg = 
+        case flg of
+         Clean -> Elementwise cleanUp 
+         Enumerate -> OnList enumEnd
+         EnumerateBeg -> OnList enumBeg
+         (Append s) -> Elementwise $ appendToFileName s
+         (Prepend s) -> Elementwise $ prependToFileName s
+         (EnumPrepending s) -> OnList $ enumPrepending s 
+         (EnumAppending s) -> OnList $ enumAppending s 
+         (Delete s) -> Elementwise $ (modifyName (deleteWord s)) 
+         (TrimEnd s) -> Elementwise $ trimFileEnd s 
+         (TrimBeg s) -> Elementwise $ trimFileBeg s
+         (ListUsing s) -> OnList (enumEnd . (map $ modifyName (const s)))
+         (Replace o n) -> Elementwise (replaceWord o n)
+         (GroupEnum) -> OnList (enumSimilarBy 20)
+         (FileSelection _) -> error "FileSelection is not an action"
 
--- | SelectionModifier wraps functions that operate on each file name in isolation or 
--- functions that depend on the context of other file names
-data SelectionModifier = Elementwise (String->String) | OnList ([String]->[String])
-
--- | A type to specify a kind of selection
-data FileSelector = WithExt String | WithSubstring String | OnAll
-
-fileSelectorFromArg :: Flag -> FileSelector
-fileSelectorFromArg (FileSelection arg) = 
-						  let 
-						    isExtensionSel = not (null $ getExt arg) 
-                          in 
-                             if isExtensionSel 
-                          	 then WithExt $ getExt arg
-                          	 else WithSubstring arg 
-
-isFileSelecion :: Flag -> Bool 
-isFileSelecion (FileSelection s) = True
-isFileSelecion _ = False
-
-getFileSelection :: [Flag] -> Maybe Flag
-getFileSelection = find isFileSelecion
 
 main :: IO ()
 main = do
 	flags <- renamingOpts
-	let fs =  maybe OnAll fileSelectorFromArg (getFileSelection flags)
-	mapM_ (performOnSelection fs) flags 
+	let (FileSelection fs) =  fromMaybe (FileSelection OnAll) (getFileSelection flags)
+	let flags' = filter (not . isFileSelection) flags -- remove the FileSelection flag since its not an operation.
+	mapM_ (performOnSelection fs) flags' 
 	return ()
 
 

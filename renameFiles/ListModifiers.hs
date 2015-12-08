@@ -26,16 +26,32 @@ curry3 f = \x y z -> f (x,y,z)
 
 ------------List Functions -----------
 
+-- | Applies a function only to the head of a list
+toHead f [] = []
 toHead f (x:xs) = f x : xs 
-
+-- | Applies a function to the last element in a list
 toLast f ls = init ls ++ [f $ last ls]
 
+-- | map a function over the first elements of a list excluding the last element.
 mapInit f ls = (map f . init) ls ++ [last ls]
+
+
+padAppending n d l = l ++ replicate n d
+
+-- | 'padPreppending' n d l pads a list l prepending n d's.
+padPrepending n d l = replicate n d ++ l
 
 -- | 'splitEvery' n creates a list with sublists of length n.
 splitEvery _ [] = []
 splitEvery n list = first : (splitEvery n rest) 
     where (first,rest) = splitAt n list
+
+-- | 'insertAt' n c is a function that insert elem c at index n 
+insertAt n c l | length l < (n + 1) = l 
+insertAt n c l = take (n+1) l ++ [c] ++ (drop (n+1) l)
+
+-- | drop in an element every n elements
+intersperseEvery n e = concat . intersperse [e] . splitEvery n
 
 -- | 'innerZip' takes a list and returns a a list of adjacent elements
 -- If the input list has odd length then the last element is trimmed.
@@ -54,6 +70,7 @@ modifyWord f w str | length str < length w = str
 				   | isPrefixOf w str = f w ++ modifyWord f w (drop (length w) str)
 				   | otherwise = (head str) : modifyWord f w (tail str)
 
+-- | Does a list contain a sublist?
 containsWord w str | length str < length w = False
 				   | isPrefixOf w str = True
 				   | otherwise = containsWord w (tail str)
@@ -64,6 +81,7 @@ containsWord w str | length str < length w = False
 replaceWord old new = modifyWord (const new) old
 
 
+-- | Delete every occurrence of a sublist in a list
 deleteWord :: Eq a => [a] -> [a] -> [a]
 deleteWord = modifyWord (const []) 
 
@@ -75,8 +93,13 @@ deleteLastWhile :: (t -> Bool) -> [t] -> [t]
 deleteLastWhile _ [] = []
 deleteLastWhile p xs = if p (last xs) then deleteLastWhile p (init xs) else xs
 
+
+-- | Trim both ends of a list while a predicate holds for head and last element of a list
+-- 
+-- > deleteEndsWhile p = (deleteHeadWhile p) . (deleteLastWhile p)
 deleteEndsWhile :: (t -> Bool) -> [t] -> [t]
 deleteEndsWhile p = (deleteHeadWhile p) . (deleteLastWhile p)
+
 
 deleteExtra :: Eq a => [a] -> [a] -> [a]
 deleteExtra ch str = concat $ map (headOrId $ allAreOneOf ch) $ groupBy (==) str
@@ -90,7 +113,10 @@ decimate (x:_) = [x]
 decimate _ = []
 
 everyEven = decimate
+
+-- | Collect all elements that are odd indices of a list 
 everyOdd = decimate . tail
+
 
 --------------------- Comparerisons -------------------
 --sucesive equal elems in two lists
@@ -113,12 +139,20 @@ zipEq l h =  takeWhile (/= ' ') $ (zipWith (\x y -> if x == y then x else ' ')) 
 withEqLen l = init $ scanl zipEq (head l) l
 --------------------- Predicates -----------------------
 
+-- | Compose a list of predicates ensuring every predicate is hold
+--
+-- > allOf = combinePredicates and
 allOf :: [a -> Bool] -> a -> Bool
 allOf = combinePredicates and
 
+-- | At least one predicate in a list of predicates hold
+--
+-- > oneOf = combinePredicates or
 oneOf :: [a -> Bool] -> a -> Bool
 oneOf = combinePredicates or
 
+-- | 'combinePredicates' logOp preds val, applies all preds to val yielding a list of bools 
+-- witch are then combined with logOp 
 combinePredicates :: ([Bool] -> Bool) -> [a -> Bool] -> a -> Bool
 combinePredicates logicOp preds val = (logicOp . map ($ val)) preds
 

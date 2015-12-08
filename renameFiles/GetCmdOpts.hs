@@ -1,7 +1,10 @@
 module GetCmdOpts ( 
     renamingOpts,
     Flag (..),
-    makeReplace
+    FileSelector (..),
+    makeReplace,
+    getFileSelection,
+    isFileSelection
      ) where
 
 import System.Environment ( getArgs )
@@ -10,7 +13,9 @@ import Data.Maybe( fromMaybe )
 import Text.Read
 import Data.List
 
--- | renamingOpts delivers the command line specified flags/options 
+import FileName (getExt)
+-- | renamingOpts retuns a list of parsed command line options for renaming files. i.e all possible operations 
+-- the program supports
 renamingOpts = do
   args <- getArgs
   case getOpt RequireOrder opciones args of
@@ -18,22 +23,39 @@ renamingOpts = do
     (_,     nonOpts, [])     -> error $ "unrecognized arguments: " ++ unwords nonOpts
     (_,     _,       msgs)   -> error $ concat msgs ++ usageInfo header' opciones
 
--- | A command line flag is on of the following: 
+-- | Command line arguments are parsed into one of the following constructors.
 data Flag =   TrimBeg Int  -- ^ Trim a number of char off starting from left to right
             | TrimEnd Int -- ^ Trim n char from the end 
             | ListUsing String -- ^ Enumerate files prepending a constant string
             | Enumerate -- ^ Enumerate files at the end
             | EnumerateBeg
             | Delete String -- ^ Delete occurrences of a substring
-            | EnumPrepending String 
-            | EnumAppending String
+            | EnumPrepending String -- ^ Replace file names for a constant string and prepend an increasing number.
+            | EnumAppending String -- ^ Replace file names for a constant string and appending an increasing number.
             | Clean -- ^ Clean up file name replace white space for _ remove sybolic chars, remove trailing spaces.
             | Append String -- ^ Append a string to each file name
             | Prepend String -- ^ Prepend a string to each file name
             | Replace String String -- ^ Replace all instances of 
-            | FileSelection String
-            | GroupEnum
+            | FileSelection FileSelector -- ^ A selection to perform the operation on. 
+            | GroupEnum -- ^ Files named similar get enumerated.
             deriving (Show,Eq)
+
+-- | A type to specify a kind of selection
+-- e.g files with certain extension or substring or just all files.
+data FileSelector = WithExt String | WithSubstring String | OnAll deriving (Show, Eq)
+
+
+isFileSelection :: Flag -> Bool 
+isFileSelection (FileSelection _) = True
+isFileSelection _ = False
+
+getFileSelection :: [Flag] -> Maybe Flag
+getFileSelection = find isFileSelection
+
+makeFileSelector str 
+    | not (null $ getExt str) = WithExt $ getExt str
+    | null str = OnAll
+    | otherwise = WithSubstring str  
 
 options :: [OptDescr Flag]
 options = [
@@ -49,7 +71,7 @@ options = [
     Option ['N'] ["numberBeg"]   (NoArg EnumerateBeg) "Enumerate file names at beginning",
     Option ['l'] ["listWith"]   (ReqArg ListUsing "String") "Enumerate files prepending a constant string",
     Option ['r'] ["replace"]   (ReqArg makeReplace "oldString|newString") "Replace old substring with new string",
-    Option ['s'] ["selection"]   (ReqArg FileSelection "String") "Choose a file extension or file name substring",
+    Option ['s'] ["selection"]   (ReqArg (FileSelection . makeFileSelector) "String") "Choose a file extension or file name substring",
     Option ['g'] ["groupEnum"] (NoArg GroupEnum) "Enumerates files by groups of similar names"
   ]
  
@@ -67,7 +89,7 @@ opciones = [
     Option ['N'] ["numberBeg"]   (NoArg EnumerateBeg) "Enumerar nombre con numero al principio del nombre",
     Option ['l'] ["listWith"]   (ReqArg ListUsing "String") "Enumerar y remplazar nombre por palabra",
     Option ['r'] ["replace"]   (ReqArg makeReplace "oldString|newString") "Reemplazar palabra vieja por nueva",
-    Option ['s'] ["seleccion"]   (ReqArg FileSelection "String") "Elige una extension o  sub nombre",
+    Option ['s'] ["seleccion"]   (ReqArg (FileSelection . makeFileSelector) "String") "Elige una extension o  sub nombre",
     Option ['g'] ["groupEnum"] (NoArg GroupEnum) "Enumerar por grupos, los archivos de nombres similares se enumeran separadamente"
   ]
 
@@ -83,3 +105,6 @@ twoArgs f = uncurry f . (tupleSepBy "| ")
 
 header = "Ways to use this program..."
 header' = "Formas de uso de este programa..."
+
+
+-- main = renamingOpts >>= mapM print
