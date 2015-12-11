@@ -28,7 +28,7 @@ data Flag =   TrimBeg Int  -- ^ Trim a number of char off starting from left to 
             | TrimEnd Int -- ^ Trim n char from the end 
             | ListUsing String -- ^ Enumerate files prepending a constant string
             | Enumerate -- ^ Enumerate files at the end
-            | EnumerateBeg
+            | EnumerateBeg -- ^ Enumerate files at the beginning
             | Delete String -- ^ Delete occurrences of a substring
             | EnumPrepending String -- ^ Replace file names for a constant string and prepend an increasing number.
             | EnumAppending String -- ^ Replace file names for a constant string and appending an increasing number.
