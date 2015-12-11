@@ -8,6 +8,8 @@ import Data.Either
 import Lucid
 
 {-
+To load this in GHCI first do :set -XOverloadedStrings
+
 Generate haddock Documentation runing this in terminal: 
 -h is for Generating Html
 -w turnoff warnings

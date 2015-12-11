@@ -24,13 +24,14 @@ Something came to mind since HtmlT m () is a monad transformer. What about tryin
 
 defItem = Item "Hamburguesa" (Just "Con tocineta y queso") "10.000"
 
-
+--------------------------- Format -------------------------- 
 formatPrice :: String -> String
 formatPrice l | length l < 4 = "$" ++ l
 formatPrice l = ("$" ++) . addDot . removeDollar  $ l
           where 
             removeDollar = filter (not . flip elem ("$." :: String))
             addDot = reverse . insertAt 3 '.' . reverse
+
 
 formatItem :: Item -> Item 
 formatItem it = it {firstPrice = formatPrice $ firstPrice it} 
@@ -47,6 +48,9 @@ instance ToHtml a => ToHtml (Maybe a) where
 comentedSection :: String -> Html ()
 comentedSection sectionTitle =  "<!-- ****************" 
                                           <> (toHtml sectionTitle) <> "***************** -->" 
+
+
+--------------------- Estilos --------------------
 
 --Single item styles Sushi 7
 itemStyle :: Item -> Html ()
@@ -73,16 +77,12 @@ itemCartaStyle (D1PItem i) = itemStyle i
 itemCartaStyle (D2PItem i) = item2Style i
 itemCartaStyle (D3PItem i) = itemStyle $ (itemInfo . item2Info) i
 
---Column options
+----------------------------- Column options ------------------------------
 twoItemRow :: ItemCarta -> ItemCarta -> Html ()
-twoItemRow i i2 = 
-	div_ [class_ "row"] $ do 
-       mapM_ (div_ [class_ "large-6 medium-6 small-12 columns"] . itemCartaStyle) [i,i2]
+twoItemRow i i2 = nItemRow 2 [i,i2]
 
 threeItemRow :: ItemCarta -> ItemCarta -> ItemCarta -> Html ()
-threeItemRow i i2 i3 = 
-	div_ [class_ "row"] $ do 
-       mapM_ (div_ [class_ "large-4 medium-4 small-12 columns"] . itemCartaStyle) [i,i2,i3]
+threeItemRow i i2 i3 = nItemRow 3 [i,i2,i3]
 
 nItemRow :: Int -> [ItemCarta] -> Html ()
 nItemRow x is = 
@@ -94,11 +94,12 @@ nItemRow x is =
       
 makeNRowClass 3 = "large-4 medium-4 small-12 columns"
 makeNRowClass 2 = "large-6 medium-6 small-12 columns"
+makeNRowClass 1 = "large-12 medium-12 small-12 columns"
 
 
 nextMultiple n l = if mod l n == 0 then l else (div l n + 1) * n
 
--- Exports 
+------------------------------------ Exports ---------------------------------- 
 -- | make a two column layout for the html
 styleItemRecords :: [ItemCarta] -> Html ()
 styleItemRecords is = (comentedSection "section") <> mapM_ (uncurry twoItemRow) (innerZip is) 
