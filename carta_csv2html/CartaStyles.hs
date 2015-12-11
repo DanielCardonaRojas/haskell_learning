@@ -29,8 +29,8 @@ formatPrice :: String -> String
 formatPrice l | length l < 4 = "$" ++ l
 formatPrice l = ("$" ++) . addDot . removeDollar  $ l
           where 
-            removeDollar = filter (not . flip elem ("$." :: String))
-            addDot = reverse . insertAt 3 '.' . reverse
+            removeDollar = filter (not . flip elem ("$. " :: String))
+            addDot = reverse . insertAt 2 '.' . reverse
 
 
 formatItem :: Item -> Item 
@@ -50,7 +50,7 @@ comentedSection sectionTitle =  "<!-- ****************"
                                           <> (toHtml sectionTitle) <> "***************** -->" 
 
 
---------------------- Estilos --------------------
+--------------------- Estilos para items de 1,2 o 3 precios --------------------
 
 --Single item styles Sushi 7
 itemStyle :: Item -> Html ()
@@ -72,12 +72,14 @@ item2Style i2 = let i = formatItem $ itemInfo i2 in
 	   		span_ ((toHtml $ firstPrice i) <> " 1/2 " <> (toHtml $ secondPrice i2))
 
 
+
+
+----------------------------- Column options ------------------------------
 itemCartaStyle :: ItemCarta -> Html ()
 itemCartaStyle (D1PItem i) = itemStyle i 
 itemCartaStyle (D2PItem i) = item2Style i
 itemCartaStyle (D3PItem i) = itemStyle $ (itemInfo . item2Info) i
 
------------------------------ Column options ------------------------------
 twoItemRow :: ItemCarta -> ItemCarta -> Html ()
 twoItemRow i i2 = nItemRow 2 [i,i2]
 
@@ -95,6 +97,7 @@ nItemRow x is =
 makeNRowClass 3 = "large-4 medium-4 small-12 columns"
 makeNRowClass 2 = "large-6 medium-6 small-12 columns"
 makeNRowClass 1 = "large-12 medium-12 small-12 columns"
+makeNRowClass _ = error "No se pueden tantas columnas"
 
 
 nextMultiple n l = if mod l n == 0 then l else (div l n + 1) * n

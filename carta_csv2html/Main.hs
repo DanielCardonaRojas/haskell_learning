@@ -18,15 +18,25 @@ haddock <fileName>.hs -o <folderNameForDocumentation> -h -w --optghc=-XOverloade
 -}
 
 -- Todo tidy up this function handle different args passing (e.g default outfileName)
+getFileName = reverse . dropUntil '.' . reverse where dropUntil c = tail . dropWhile (/= c)
+
 main :: IO ()
 main = do
-	putStrLn "Usage: inputFile outputFile option [n/a]"
-	[inF,outF, opt] <- getArgs
+	args <- getArgs
+	case length args of 
+		2 -> do
+			let [inF,opt] = args 
+			process inF (getFileName inF) opt
+		3 -> do 
+			let [inF,outF, opt] = args
+			process inF outF opt
+		_ -> putStrLn "Usage: inputFile outputFile option [n/a]"
+
+process inF outF opt = do 
 	x <- fmap rights $ readNamedRecords' inF :: IO [ItemCarta]
 	let renderHtml = renderToFile (outF ++ ".html")
-	case opt of 
-		"2" -> renderHtml (styleItemRecords x)
-	    "3" -> renderHtml (styleItemRecords3 x)
+	renderHtml (styleCartaItems (read opt ::Int) x)
+	
 	
 	
 

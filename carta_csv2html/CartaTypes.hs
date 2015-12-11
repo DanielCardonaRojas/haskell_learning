@@ -5,7 +5,7 @@ module CartaTypes (ItemCarta (..), Item (..), Item2 (..), Item3 (..)) where
 import Data.Either
 import CsvUtils
 import Data.Csv
-import Control.Applicative ((<|>))
+import Control.Applicative 
            
 
 
