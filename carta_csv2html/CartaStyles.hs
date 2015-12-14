@@ -53,23 +53,47 @@ comentedSection sectionTitle =  "<!-- ****************"
 --------------------- Estilos para items de 1,2 o 3 precios --------------------
 
 --Single item styles Sushi 7
+-- itemStyle :: Item -> Html ()
+-- itemStyle it = let i = formatItem it in do 
+-- 	div_ [class_ "menu-c"] $ do 
+-- 	   h3_ [class_ "carta-name"] (toHtml $ itemName i)
+-- 	   div_ [class_ "content-info-price"] $ do 
+-- 	   	(toHtml $ description i)
+-- 	   	span_ [class_ "price right"] (span_ (toHtml $ firstPrice i))
+
+-- itemStyle :: Item -> Html ()
+-- itemStyle it = let i = formatItem it in do 
+-- 	div_ [class_ "large-10 medium-12 small-12 columns"] $ do 
+-- 	   h5_ [class_ "carta-titulo"] (toHtml $ itemName i)
+-- 	div_ [class_ "large-2 medium-12 small-12 columns"] $ do 
+-- 	   	(toHtml $ description i)
+-- 	   	span_ [class_ "carta-precio"] (toHtml $ firstPrice i)
+
 itemStyle :: Item -> Html ()
-itemStyle it = let i = formatItem it in do 
+itemStyle it = let i = formatItem it in do
 	div_ [class_ "menu-c"] $ do 
 	   h3_ [class_ "carta-name"] (toHtml $ itemName i)
 	   div_ [class_ "content-info-price"] $ do 
-	   	(toHtml $ description i)
-	   	span_ [class_ "price right"] (span_ (toHtml $ firstPrice i))
+	   	(toHtml $ description i) <> (toHtml $ firstPrice i)
 
 item2Style :: Item2 -> Html ()
-item2Style i2 = let i = formatItem $ itemInfo i2 in 
-	do
-	div_ [class_ "menu-c"] $ do 
-	   h3_ [class_ "carta-name"] (toHtml $ itemName i)
-	   div_ [class_ "content-info-price"] $ do 
-	   	(toHtml $ description i)
-	   	span_ [class_ "price right"] $ do 
-	   		span_ ((toHtml $ firstPrice i) <> " 1/2 " <> (toHtml $ secondPrice i2))
+item2Style i2 = let i = formatItem $ itemInfo i2 in do
+	div_ [class_ "row"] $ do 
+	  div_ [class_ "large-4 columns"] $ h5_ [class_ "carta-titulo"] (toHtml $ itemName i)
+	  div_ [class_ "large-4 columns"] $ span_ [class_ "carta-descripcion"] (toHtml $ description i)
+	  div_ [class_ "large-2 columns"] $ span_ [class_ "carta-precio"] (toHtml $ firstPrice i)
+	  div_ [class_ "large-2 columns"] $ span_ [class_ "carta-precio"] (toHtml $ secondPrice i2) 
+
+item3Style :: Item3 -> Html ()
+item3Style i3 = let i2 = item2Info i3; i = formatItem $ itemInfo i2 in do
+	div_ [class_ "row"] $ do 
+	  div_ [class_ "large-3 columns"] $ h5_ [class_ "carta-titulo"] (toHtml $ itemName i)
+	  div_ [class_ "large-3 columns"] $ span_ [class_ "carta-descripcion"] (toHtml $ description i)
+	  div_ [class_ "large-2 columns"] $ span_ [class_ "carta-precio"] (toHtml $ firstPrice i)
+	  div_ [class_ "large-2 columns"] $ span_ [class_ "carta-precio"] (toHtml $ secondPrice i2) 
+	  div_ [class_ "large-2 columns"] $ span_ [class_ "carta-precio"] (toHtml $ thirdPrice i3) 
+	   
+	   	
 
 
 
@@ -78,7 +102,7 @@ item2Style i2 = let i = formatItem $ itemInfo i2 in
 itemCartaStyle :: ItemCarta -> Html ()
 itemCartaStyle (D1PItem i) = itemStyle i 
 itemCartaStyle (D2PItem i) = item2Style i
-itemCartaStyle (D3PItem i) = itemStyle $ (itemInfo . item2Info) i
+itemCartaStyle (D3PItem i) = item3Style i
 
 twoItemRow :: ItemCarta -> ItemCarta -> Html ()
 twoItemRow i i2 = nItemRow 2 [i,i2]
@@ -96,7 +120,7 @@ nItemRow x is =
       
 makeNRowClass 3 = "large-4 medium-4 small-12 columns"
 makeNRowClass 2 = "large-6 medium-6 small-12 columns"
-makeNRowClass 1 = "large-12 medium-12 small-12 columns"
+makeNRowClass 1 = "large-6 medium-12 small-12 large-centered columns"
 makeNRowClass _ = error "No se pueden tantas columnas"
 
 
