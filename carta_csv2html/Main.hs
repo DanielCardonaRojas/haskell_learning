@@ -6,6 +6,7 @@ import CartaStyles
 import System.Environment (getArgs)
 import Data.Either
 import Lucid
+import Customizable
 
 {-
 To load this in GHCI first do :set -XOverloadedStrings
@@ -32,12 +33,31 @@ main = do
 			process inF outF opt
 		_ -> putStrLn "Usage: inputFile outputFile option [n/a]"
 
+process :: String -> String -> String -> IO ()
 process inF outF opt = do 
 	x <- fmap rights $ readNamedRecords' inF :: IO [ItemCarta]
 	let renderHtml = renderToFile (outF ++ ".html")
 	renderHtml (styleCartaItems (read opt ::Int) x)
-	
-	
-	
+
+process' :: Int -> String -> String -> String -> IO ()
+process' s inF outF opt = 
+	let 
+	  renderHtml h = renderToFile (outF ++ ".html") (styleCartaItems (read opt :: Int) h)
+	  correctParse = fmap rights $ readNamedRecords' inF :: IO [ItemCarta]
+	in case s of 
+	       0 -> correctParse >>= renderHtml 
+	       1 -> correctParse >>= renderHtml . map (BrasasItemCarta) 
+	       2 -> correctParse >>= renderHtml . map (Sushi7ItemCarta)
 
 
+
+
+
+
+	    	
+	    	
+	    	
+
+
+ 
+	  
