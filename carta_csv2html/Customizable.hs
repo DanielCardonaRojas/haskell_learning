@@ -9,8 +9,6 @@ import CartaTypes
 import ListModifiers
 
 -------------------- Helpers ------------------
-firstPrice' :: Monad m => Item -> HtmlT m ()
-firstPrice' = toHtml . firstPrice
 
 description' :: Monad m => Item -> HtmlT m ()
 description' = toHtml . description
@@ -18,11 +16,14 @@ description' = toHtml . description
 itemName' :: Monad m => Item -> HtmlT m ()
 itemName' = toHtml . itemName
 
+firstPrice' :: Monad m => Item -> HtmlT m ()
+firstPrice' = toHtml . formatPrice . firstPrice
+
 secondPrice' :: Monad m => Item2 -> HtmlT m ()
-secondPrice' = toHtml . secondPrice
+secondPrice' = toHtml . formatPrice . secondPrice
 
 thirdPrice' :: Monad m => Item3 -> HtmlT m ()
-thirdPrice' = toHtml . thirdPrice
+thirdPrice' = toHtml . formatPrice . thirdPrice
 --------------------------- Format -------------------------- 
 formatPrice :: String -> String
 formatPrice l | length l < 4 = "$" ++ l
@@ -100,10 +101,20 @@ instance ToHtml Sushi7ItemCarta where
 		          D2PItem i -> undefined
 		          D3PItem i -> undefined
 	toHtmlRaw _ = undefined 
+
 -- Style Wajaca
 newtype WajacaItemCarta = WajacaItemCarta { wajacaItemCarta :: ItemCarta} deriving (Eq, Show) 
 instance ToHtml WajacaItemCarta where
 	toHtml (WajacaItemCarta m) = case m of 
+		          D1PItem i -> undefined
+		          D2PItem i -> undefined
+		          D3PItem i -> undefined
+	toHtmlRaw _ = undefined 
+
+-- Style Wajaca
+newtype VillageItemCarta = VillageItemCarta { villageItemCarta :: ItemCarta} deriving (Eq, Show) 
+instance ToHtml VillageItemCarta where
+	toHtml (VillageItemCarta m) = case m of 
 		          D1PItem i -> undefined
 		          D2PItem i -> undefined
 		          D3PItem i -> undefined

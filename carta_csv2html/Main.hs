@@ -33,23 +33,24 @@ main = do
 			process inF outF opt
 		_ -> putStrLn "Usage: inputFile outputFile option [n/a]"
 
-process :: String -> String -> String -> IO ()
-process inF outF opt = do 
-	x <- fmap rights $ readNamedRecords' inF :: IO [ItemCarta]
-	let renderHtml = renderToFile (outF ++ ".html")
-	renderHtml (styleCartaItems (read opt ::Int) x)
 
-process' :: Int -> String -> String -> String -> IO ()
-process' s inF outF opt = 
+process :: String -> String -> String -> IO ()
+process inF outF opt = 
 	let 
-	  renderHtml h = renderToFile (outF ++ ".html") (styleCartaItems (read opt :: Int) h)
+	  (cols, s) = parseOpt opt
+	  renderHtml h = renderToFile (outF ++ ".html") (styleCartaItems cols h)
 	  correctParse = fmap rights $ readNamedRecords' inF :: IO [ItemCarta]
 	in case s of 
-	       0 -> correctParse >>= renderHtml 
-	       1 -> correctParse >>= renderHtml . map (BrasasItemCarta) 
-	       2 -> correctParse >>= renderHtml . map (Sushi7ItemCarta)
+	       "" -> correctParse >>= renderHtml 
+	       "b" -> correctParse >>= renderHtml . map (BrasasItemCarta) 
+	       "s" -> correctParse >>= renderHtml . map (Sushi7ItemCarta)
+	       "w" -> correctParse >>= renderHtml . map (WajacaItemCarta)
+	       "v" -> correctParse >>= renderHtml . map (VillageItemCarta)
+	       _  -> putStrLn "Couldn't match style option."
 
 
+parseOpt :: String -> (Int, String)
+parseOpt (c:cs) = (read [c], safeTail cs) where safeTail s = if null s then [] else tail s 
 
 
 

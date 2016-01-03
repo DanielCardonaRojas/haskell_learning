@@ -36,7 +36,7 @@ data Flag =   TrimBeg Int  -- ^ Trim a number of char off starting from left to 
             | Append String -- ^ Append a string to each file name
             | Prepend String -- ^ Prepend a string to each file name
             | Replace String String -- ^ Replace all instances of 
-            | FileSelection FileSelector -- ^ A selection to perform the operation on. 
+            | FileSelection FileSelector -- ^ A selection to perform the operation on. (Defaults to all files, .ext to operate on all ext's, otherwise on subnames) 
             | GroupEnum -- ^ Files named similar get enumerated.
             deriving (Show,Eq)
 

@@ -43,6 +43,7 @@ padPrepending n d l = replicate n d ++ l
 
 -- | 'splitEvery' n creates a list with sublists of length n.
 splitEvery _ [] = []
+splitEvery 0 ls = [ls]
 splitEvery n list = first : (splitEvery n rest) 
     where (first,rest) = splitAt n list
 

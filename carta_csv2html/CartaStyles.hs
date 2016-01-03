@@ -35,6 +35,7 @@ itemCartaStyle :: ToHtml m => m -> Html ()
 itemCartaStyle = toHtml   
 
 nItemRow :: ToHtml m => Int -> [m] -> Html ()
+nItemRow 0 is = mapM_ itemCartaStyle is 
 nItemRow x is = 
 	let 
 	 padding m l = nextMultiple m l - l
@@ -51,8 +52,11 @@ makeNRowClass _ = error "No se pueden tantas columnas"
 nextMultiple n l = if mod l n == 0 then l else (div l n + 1) * n
 
 ------------------------------------ Exports ---------------------------------- 
--- | Takes an int representing the number of columns a list Items and returns some Html
+-- | 'styleCartaItems' __n is__ produces Html using the ToHtml instances of __is__ elements and  
+-- gathering them in rows of n columns (Bootstrap or Zurb Foundation).
+-- 
+-- > Note: calling styleCartaItems 0 is will do no extra wrapping around the HTML produced by each item.
 styleCartaItems :: ToHtml m => Int -> [m] -> Html () 
-styleCartaItems n is = (comentedSection " section ") <> mapM_  (nItemRow n) (splitEvery n is)
+styleCartaItems n is = mapM_  (nItemRow n) (splitEvery n is)
 
 

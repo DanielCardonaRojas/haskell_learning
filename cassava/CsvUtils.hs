@@ -19,7 +19,7 @@ decodeByName1 = fmap (fmap V.head) . decodeByName
 decodeAllByIndex :: FromRecord b => CL.ByteString -> [Either String b]
 decodeAllByIndex = map decodeByIndex1 . CL.lines 
 
-decodeAllByName:: FromNamedRecord b => CL.ByteString -> [Either String (Header, b)]
+decodeAllByName :: FromNamedRecord b => CL.ByteString -> [Either String (Header, b)]
 decodeAllByName bs = map decodeByName1 linesWithHeader  
 					 where
 						allLines = CL.lines bs 

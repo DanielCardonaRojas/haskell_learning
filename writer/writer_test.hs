@@ -10,3 +10,6 @@ test1 = do
 	if palindrome x then tell ([x]) else return ()
 
 --runWriterT (replicateM_ 3 test1)
+
+-- | runWriterWith w m offsets initial value to w instead of mempty.
+runWriterWith w m = runWriter (writer ((),w) >> m)

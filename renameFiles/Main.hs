@@ -65,13 +65,18 @@ renameFiles p src fun = do
 		let rename' = uncurry renameFile 
 		mapM_ rename' oldNewList
 
+-- | 'renameAlFilesAt' __p__ renames all files at p transforming the list of files names.
 renameAllFilesAt :: FilePath -> ([String] -> [String]) -> IO ()
 renameAllFilesAt src fun =  renameFiles (const True) src fun
 
-renameAllFilesUsing:: ([String] -> [String]) -> IO ()
+-- | Renames all current files with a function that will transform the list of files into a 
+-- new list of file names.
+renameAllFilesUsing :: ([String] -> [String]) -> IO ()
 renameAllFilesUsing fun = getCurrentDirectory >>= flip renameAllFilesAt fun
 
-renameCopying:: (String -> Bool) -> String -> FilePath -> ([String] -> [String]) -> IO ()
+-- | renameCopying __pred folder path f__ renames files located at path satisfying pred with a function f
+-- and puts them in a folder named folder. Leaving the original unchanged  
+renameCopying :: (String -> Bool) -> String -> FilePath -> ([String] -> [String]) -> IO ()
 renameCopying p folderName src fun = copyFilesIn p src folderName >>= flip renameAllFilesAt fun 
 
 renameAllCopyingAt :: String -> FilePath -> ([String] -> [String]) -> IO ()

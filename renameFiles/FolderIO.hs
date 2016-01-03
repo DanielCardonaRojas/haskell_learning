@@ -39,7 +39,7 @@ getFileList filePath = getDirectoryContents filePath >>= return . (filter (allOf
 --getFileList filePath = getDirectoryContents filePath >>= (filterM doesFileExist)
 
 getFileListFiltering :: (FilePath -> Bool) -> FilePath -> IO [FilePath]
-getFileListFiltering p filePath = getDirectoryContents filePath >>= return . (filter (allOf [isFile,notHidden,nameIsNot "renameAllFiles",extIsNot "db", nameIs p]))
+getFileListFiltering p filePath = getDirectoryContents filePath >>= return . (filter (allOf [isFile,notHidden,nameIsNot "renameAllFiles",extIsNot "db", p]))
 
 getFolderList :: FilePath -> IO [FilePath]
 getFolderList filePath = getDirectoryContents filePath >>= return . (filter (allOf [isFolder, notHidden]))
