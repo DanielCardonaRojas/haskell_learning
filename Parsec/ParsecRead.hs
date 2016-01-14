@@ -10,7 +10,7 @@ instances automatically it involves language extensions (UndecidableInstances, F
 
 -}
 
-module ParsecRead (ParsecRead (..),readF,ParserR) where
+module ParsecRead (ParsecRead (..),readInside,ParserR) where
 
 import Text.Parsec
 
@@ -37,10 +37,7 @@ class ParsecRead a where
     
     parsecRead :: ParserR a
 	
-	
-
 eitherToList  = either (const []) id 
-
 
 parsecRead' :: ParsecRead a => ParserR [(a,String)]
 parsecRead' = do 
@@ -49,10 +46,9 @@ parsecRead' = do
 	return [(a,rest)]
 
 
-
 -- | A simple utility to read inside functors. 
-readF :: (Functor f, Read a) => f String -> f a 
-readF = fmap read 
+readInside :: (Functor f, Read a) => f String -> f a 
+readInside = fmap read 
 
 -- Instances of Read Class 
 -- This needs some king of Follow Undecidable instance Extension.
