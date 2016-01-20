@@ -90,7 +90,7 @@ instance ToHtml AnkItemCarta where
 		          D1PItem i -> do
 		               dl_ $ do 
 		               	  dt_ (itemName' i)
-		               	  dd_ [class_ "price"] (firstPrice' i)
+		               	  dd_ [class_ "price"] (priceOne i)
 		               div_ [class_ "carta-txt"] $ do 
 		               	  span_ [class_ "carta-span"] (description' i)    
                      	          	

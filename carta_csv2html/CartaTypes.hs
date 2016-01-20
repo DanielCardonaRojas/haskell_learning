@@ -63,5 +63,27 @@ instance FromNamedRecord ItemCarta where
                                   <|> (D1PItem <$> (parseNamedRecord r)) 
 
 
+-- Utility Classes
+
+class PricedOnce a where 
+    priceOne :: a -> String
+
+class PricedTwice a where
+    priceTwo :: a -> String
 
 
+instance PricedOnce Item where
+    priceOne = firstPrice
+
+instance PricedOnce Item2 where
+    priceOne = firstPrice . itemInfo 
+
+
+instance PricedOnce Item3 where
+    priceOne = firstPrice . itemInfo . item2Info
+
+instance PricedTwice Item2 where
+    priceTwo = secondPrice
+
+instance PricedTwice Item3 where
+    priceTwo = secondPrice . item2Info

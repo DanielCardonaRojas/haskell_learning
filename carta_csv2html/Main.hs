@@ -5,6 +5,7 @@ import CsvUtils
 import CartaTypes
 import CartaStyles
 import System.Environment (getArgs)
+import System.Directory
 import Data.Either
 import Lucid
 import Customizable
@@ -29,12 +30,16 @@ Use 0 for no wrapping in columns
 -}
 
 -- Todo tidy up this function handle different args passing (e.g default outfileName)
-getFileName = reverse . dropUntil '.' . reverse where dropUntil c = tail . dropWhile (/= c)
 
 main :: IO ()
 main = do
 	args <- getArgs
-	case length args of 
+	case length args of
+		1 -> do
+			let [opt] = args
+			csvFiles <-  getCSVFiles
+			mapM_ print csvFiles
+			mapM_ (process' opt) csvFiles
 		2 -> do
 			let [inF,opt] = args 
 			process inF (getFileName inF) opt
@@ -43,6 +48,7 @@ main = do
 			process inF outF opt
 		_ -> putStrLn "Usage: inputFile outputFile option [n/a]" >> putStrLn "option arg example: 1a"
 
+process' opt inF = process inF (getFileName inF) opt
 
 process :: String -> String -> String -> IO ()
 process inF outF opt = 
@@ -63,13 +69,25 @@ process inF outF opt =
 parseOpt :: String -> (Int, String)
 parseOpt (c:cs) = (read [c], safeTail cs) where safeTail s = if null s then [] else tail s 
 
+--------------- Utils -------------------
+nameAndExt = swap . toBoth reverse . break' (== '.') . reverse 
+    where
+    	toBoth f (x,y) = (f x, f y)
+    	swap (x,y) = (y,x)
+    	break' p = fmap tail . break p
+
+getFileName = fst . nameAndExt
+getExt = snd . nameAndExt
+isCSV = (== "csv") . getExt
+
+getCSVFiles = filter (isCSV) <$> (getCurrentDirectory >>= getDirectoryContents)
 
 
+getStyleOption :: ToHtml b => [(String,b)] -> String -> Maybe b    	
+getStyleOption = flip lookup 	
 
-	    	
-	    	
-	    	
-
+--styleDictionary :: ToHtml b => [(String, ItemCarta -> b)] 	    	
+--styleDictionary = [("b",BrasasItemCarta)]
 
  
 	  
