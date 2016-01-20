@@ -6,6 +6,8 @@ import Data.Either
 import CsvUtils
 import Data.Csv
 import Control.Applicative 
+import Data.ByteString.Char8
+import Data.ByteString.Lazy.Char8
            
 
 

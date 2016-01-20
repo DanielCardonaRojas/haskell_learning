@@ -83,6 +83,24 @@ instance ToHtml ItemCarta where
 		          D3PItem i -> item3Style i 
 
 	toHtmlRaw = undefined
+-- Style Restaurante Ank 
+newtype AnkItemCarta = AnkItemCarta { ankItemCarta :: ItemCarta} deriving (Eq, Show)
+instance ToHtml AnkItemCarta where
+	toHtml (AnkItemCarta m) = case m of 
+		          D1PItem i -> do
+		               dl_ $ do 
+		               	  dt_ (itemName' i)
+		               	  dd_ [class_ "price"] (firstPrice' i)
+		               div_ [class_ "carta-txt"] $ do 
+		               	  span_ [class_ "carta-span"] (description' i)    
+                     	          	
+
+
+
+		          D2PItem i -> undefined
+		          D3PItem i -> undefined
+	toHtmlRaw _ = undefined 
+
 
 -- Style Brasas 
 newtype BrasasItemCarta = BrasasItemCarta { brasasItemCarta :: ItemCarta} deriving (Eq, Show)

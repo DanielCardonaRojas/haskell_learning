@@ -25,7 +25,7 @@ decodeAllByName :: FromNamedRecord b => CL.ByteString -> [Either String (Header,
 decodeAllByName bs = map decodeByName1 linesWithHeader  
 					 where
 						allLines = CL.lines bs 
-						header = flip BL.append "\n" (head $ CL.lines bs) 
+						header = BL.append (head $ CL.lines bs) ("\n")
 						linesWithHeader = map (BL.append header) (tail allLines)
 
 
