@@ -39,3 +39,4 @@ main2 :: FilePath -> IO ()
 main2 filePath = do  
 	res <- parseFile (many1 parserSRT) filePath 
 	mapM_ print $ eitherToList res
+

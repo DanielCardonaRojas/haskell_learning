@@ -1,4 +1,10 @@
-module CartaTypes (ItemCarta (..), Item (..), Item2 (..), Item3 (..)) where
+module CartaTypes ( ItemCarta (..)
+                  , Item (..)
+                  , Item2 (..)
+                  , Item3 (..)
+                  , PricedOnce (..)
+                  ,PricedTwice (..)
+                  ,NamedItem (..)) where
 
 {-# LANGUAGE OverloadedStrings #-}
 
@@ -71,6 +77,10 @@ class PricedOnce a where
 class PricedTwice a where
     priceTwo :: a -> String
 
+class NamedItem a where
+    itemsName :: a -> String
+    itemsDescription :: a -> Maybe String
+
 
 instance PricedOnce Item where
     priceOne = firstPrice
@@ -87,3 +97,20 @@ instance PricedTwice Item2 where
 
 instance PricedTwice Item3 where
     priceTwo = secondPrice . item2Info
+
+instance NamedItem Item where
+    itemsName = itemName
+    itemsDescription = description
+
+instance NamedItem Item2 where
+    itemsName = itemName . itemInfo
+    itemsDescription = description . itemInfo
+
+instance NamedItem Item3 where
+    itemsName = itemName . itemInfo . item2Info
+    itemsDescription = description . itemInfo . item2Info 
+
+
+
+
+

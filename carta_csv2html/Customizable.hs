@@ -10,17 +10,17 @@ import ListModifiers
 
 -------------------- Helpers ------------------
 
-description' :: Monad m => Item -> HtmlT m ()
-description' = toHtml . description
+priceOne' :: (Monad m, PricedOnce a) => a -> HtmlT m ()
+priceOne' = toHtml . priceOne
 
-itemName' :: Monad m => Item -> HtmlT m ()
-itemName' = toHtml . itemName
+priceTwo' :: (Monad m, PricedTwice a) => a -> HtmlT m ()
+priceTwo' = toHtml . priceTwo
 
-firstPrice' :: Monad m => Item -> HtmlT m ()
-firstPrice' = toHtml . formatPrice . firstPrice
+itemsDescription' :: (Monad m, NamedItem a) => a -> HtmlT m ()
+itemsDescription' = toHtml . itemsDescription
 
-secondPrice' :: Monad m => Item2 -> HtmlT m ()
-secondPrice' = toHtml . formatPrice . secondPrice
+itemsName' ::  (Monad m, NamedItem a) => a -> HtmlT m ()
+itemsName' = toHtml . itemsName
 
 thirdPrice' :: Monad m => Item3 -> HtmlT m ()
 thirdPrice' = toHtml . formatPrice . thirdPrice
@@ -40,27 +40,27 @@ formatItem it = it {firstPrice = formatPrice $ firstPrice it}
 itemStyle :: Monad m => Item -> HtmlT m ()
 itemStyle it = let i = formatItem it in do
 	div_ [class_ "menu-c"] $ do 
-	   h3_ [class_ "carta-name"] (itemName' i)
+	   h3_ [class_ "carta-name"] (itemsName' i)
 	   div_ [class_ "content-info-price"] $ do 
-	   	(description' i) <> (firstPrice' i)
+	   	(itemsDescription' i) <> (priceOne' i)
 
 -- item2Style :: Item2 -> Html ()
 item2Style :: Monad m => Item2 -> HtmlT m ()
-item2Style i2 = let i = formatItem $ itemInfo i2 in do
+item2Style i2 = do
 	div_ [class_ "row"] $ do 
-	  div_ [class_ "large-4 columns"] $ h5_ [class_ "carta-titulo"] (itemName' i)
-	  div_ [class_ "large-4 columns"] $ span_ [class_ "carta-descripcion"] (description' i)
-	  div_ [class_ "large-2 columns"] $ span_ [class_ "carta-precio"] (firstPrice' i)
-	  div_ [class_ "large-2 columns"] $ span_ [class_ "carta-precio"] (secondPrice' i2) 
+	  div_ [class_ "large-4 columns"] $ h5_ [class_ "carta-titulo"] (itemsName' i2)
+	  div_ [class_ "large-4 columns"] $ span_ [class_ "carta-descripcion"] (itemsDescription' i2)
+	  div_ [class_ "large-2 columns"] $ span_ [class_ "carta-precio"] (priceOne' i2)
+	  div_ [class_ "large-2 columns"] $ span_ [class_ "carta-precio"] (priceTwo' i2) 
 
 -- item3Style :: Item3 -> Html ()
 item3Style :: Monad m => Item3 -> HtmlT m ()
-item3Style i3 = let i2 = item2Info i3; i = formatItem $ itemInfo i2 in do
+item3Style i3 = do
 	div_ [class_ "row"] $ do 
-	  div_ [class_ "large-3 columns"] $ h5_ [class_ "carta-titulo"] (itemName' i)
-	  div_ [class_ "large-3 columns"] $ span_ [class_ "carta-descripcion"] (description' i)
-	  div_ [class_ "large-2 columns"] $ span_ [class_ "carta-precio"] (firstPrice' i)
-	  div_ [class_ "large-2 columns"] $ span_ [class_ "carta-precio"] (secondPrice' i2) 
+	  div_ [class_ "large-3 columns"] $ h5_ [class_ "carta-titulo"] (itemsName' i3)
+	  div_ [class_ "large-3 columns"] $ span_ [class_ "carta-descripcion"] (itemsDescription' i3)
+	  div_ [class_ "large-2 columns"] $ span_ [class_ "carta-precio"] (priceOne' i3)
+	  div_ [class_ "large-2 columns"] $ span_ [class_ "carta-precio"] (priceTwo' i3) 
 	  div_ [class_ "large-2 columns"] $ span_ [class_ "carta-precio"] (thirdPrice' i3) 
 
 
@@ -89,10 +89,10 @@ instance ToHtml AnkItemCarta where
 	toHtml (AnkItemCarta m) = case m of 
 		          D1PItem i -> do
 		               dl_ $ do 
-		               	  dt_ (itemName' i)
-		               	  dd_ [class_ "price"] (priceOne i)
+		               	  dt_ (itemsName' i)
+		               	  dd_ [class_ "price"] (priceOne' i)
 		               div_ [class_ "carta-txt"] $ do 
-		               	  span_ [class_ "carta-span"] (description' i)    
+		               	  span_ [class_ "carta-span"] (itemsDescription' i)    
                      	          	
 
 

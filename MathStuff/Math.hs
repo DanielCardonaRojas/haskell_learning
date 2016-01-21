@@ -9,3 +9,4 @@ linspace lower upper num = takeWhile (<= upper) $ iterate (+ inc) lower where in
 evalInRange lower upper f num = map f $ linspace lower upper num
 
 evalInRange' = uncurry evalInRange
+
