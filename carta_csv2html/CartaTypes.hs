@@ -1,3 +1,12 @@
+{- | 
+
+En este modulo se describen los tipos bases para describir un elemento de una carta de 
+restaurante. Por simplicidad se ha definido que un elemento de carta tiene nombre, posiblemente 
+descripcion y al menos un precio. Para otro tipo de elementos con mas precios como para 
+describir un trago en la seccion de licores se ha dispuesto dos tipos mas que pueden tener dos 
+o tres precios.
+
+-}
 module CartaTypes ( ItemCarta (..)
                   , Item (..)
                   , Item2 (..)
@@ -14,10 +23,7 @@ import Data.Csv
 import Control.Applicative 
 import Data.ByteString.Char8
 import Data.ByteString.Lazy.Char8
-           
 
-
---Try switching the data type for ident  field
 
 -- | Un item de carta es un item descrito con 3,2 o 1 precio. 
 data ItemCarta = D3PItem Item3 | D2PItem Item2 | D1PItem Item deriving (Eq, Show)
@@ -70,12 +76,14 @@ instance FromNamedRecord ItemCarta where
 
 
 -- Utility Classes
-
+-- | Un item o elemento de la carta/menu que tiene al menos un primer precio
 class PricedOnce a where 
     priceOne :: a -> String
 
+-- | Un item o elemento de la carta/menu que tiene al menos un primer precio
 class PricedTwice a where
     priceTwo :: a -> String
+
 
 class NamedItem a where
     itemsName :: a -> String
@@ -84,6 +92,7 @@ class NamedItem a where
 
 instance PricedOnce Item where
     priceOne = firstPrice
+
 
 instance PricedOnce Item2 where
     priceOne = firstPrice . itemInfo 

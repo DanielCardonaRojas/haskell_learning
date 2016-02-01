@@ -1,3 +1,11 @@
+{- |
+Este es el modulo que se expone al usuario para personalizar el comportamiento de el programa.
+En esencia los pasos para crear un estilo de carta nueva es crear un tipo nuevo. 
+
+> newtype AnkItemCarta = AnkItemCarta { ankItemCarta :: ItemCarta}
+
+luego hacer este tipo de dato una instancia de la clase ToHtml.
+-}
 module Customizable where
 
 {-#LANGUAGE OverloadedStrings, ExtendedDefaultRules #-}
