@@ -54,6 +54,8 @@ insertAt n c l = take (n+1) l ++ [c] ++ (drop (n+1) l)
 -- | drop in an element every n elements
 intersperseEvery n e = concat . intersperse [e] . splitEvery n
 
+concatWith x = concat . intersperse x
+
 -- | 'innerZip' takes a list and returns a a list of adjacent elements
 -- If the input list has odd length then the last element is trimmed.
 innerZip :: [a] -> [(a,a)]
