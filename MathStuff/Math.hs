@@ -5,7 +5,7 @@ use in future proyects.
 module GenericUtils where 
 
 
-
+import Data.Monoid
 
 -- Evaluating math functions on ranges 
 linspace lower upper num = takeWhile (<= upper) $ iterate (+ inc) lower where inc = abs (upper - lower) / (fromInteger num)
@@ -69,6 +69,9 @@ mapFromRange (in_min,in_max) (out_min,out_max) x =
 (<.) = (.)
 -- | Reverse composition
 (.>) = flip (.)
+
+-- | Apply a function n times 
+iterateN n f = appEndo $ foldMap Endo $ replicate n f
 
 -- | fmap to a nested functor i.e f over IO (Maybe a) not to be mistake with liftA2 witch has a different type signature.
 fmap2 :: (Functor f, Functor g) => (a -> b) -> f (g a) -> f (g b)
