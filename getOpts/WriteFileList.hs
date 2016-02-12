@@ -4,7 +4,9 @@ import Options.Applicative
 {- 
 Este programa depende del packete optparse-applicative.
 -}
-getExt = reverse . takeWhile (/= '.') . reverse
+nameAndExt filename = let (name,ext) = break (== '.') filename in (name, dropWhile (== '.') ext)
+getName = fst . nameAndExt
+getExt = snd . nameAndExt
 
 isFile = not . null . getExt
 
